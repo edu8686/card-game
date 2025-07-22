@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/card.css";
 
-function Card({ gif, handleClick, gifCliqueados, contador, contadorFunc }) {
+function Card({ gif, handleClick, gifCliqueados, contador }) {
   const { images } = gif;
 
   return (
@@ -13,7 +13,6 @@ function Card({ gif, handleClick, gifCliqueados, contador, contadorFunc }) {
           className="object-cover w-full h-full rounded-xl cursor-pointer"
           onClick={() => {
             handleClick(gif);
-            contadorFunc();
             console.log(contador)
             console.log("Gif clickeado:", gif, "Gifs cliqueados:", gifCliqueados);
           }}
