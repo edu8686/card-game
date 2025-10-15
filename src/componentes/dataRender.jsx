@@ -4,70 +4,54 @@ import Modal from "./modal";
 import ScoreRender from "./scoreRender";
 
 function DataRender({ dataToRender, getData, limit, setearLimite }) {
-  // console.log("Data to render: " + dataToRender)
-  // console.log(typeof dataToRender)
-  // console.log(dataToRender.data[0].url)
-
   const [gifsCliqueados, setGifsCliqueados] = useState([]);
   const [contador, setContador] = useState(0);
   const [gifsMostrados, setGifsMostrados] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarBoton, setMostrarBoton] = useState(true);
   const [bestScore, setBestScore] = useState(0);
-  
 
-  function manejarClick() {
-    setMostrarBoton(false); // oculta el botón
-  }
-
-  function handleSubirContador() {
-    setContador((prev) => prev + 1);
-  }
-
-  function resetearContador() {
-    setContador(0);
-  }
-
-
-  function handleGifSeleccionado(gif) {
-    const yaEsta = gifsCliqueados.some((g) => g.id === gif.id);
-    if (!yaEsta) {
-      setGifsCliqueados((prev) => [...prev, gif]);
-      const gifsAleatorios = shuffleArray(gifsMostrados);
-      setGifsMostrados(gifsAleatorios); // <== Acá sí se usa realmente
-      handleSubirContador(); // ⬅️ SOLO subir contador si es un nuevo gif
-    } else {
-      console.log("Gif ya clickeado, deberías mostrar nuevos gifs");
-      console.log("Tipo dato: ", typeof contador, " . Contador: ", contador);
-      // lógica para mezclar gifs si querés
-      setMostrarModal(true); // <-- Activar modal
-      const gifsAleatorios = shuffleArray(gifsMostrados);
-      setGifsMostrados(gifsAleatorios); // <== Acá sí se usa realmente
-      setGifsCliqueados([]);
-      handleBestScore(contador);
-      resetearContador();
-    }
-  }
-
-  function handleBestScore(contador) {
-    if (contador > bestScore) {
-      setBestScore(contador);
-    }
-  }
-
-  function shuffleArray(arr) {
-    return arr.sort(() => Math.random() - 0.5);
-  }
-
+  // ✨ Evita duplicados al cargar la data
   useEffect(() => {
     if (dataToRender?.data) {
-      setGifsMostrados(dataToRender.data);
+      const uniqueGifs = Array.from(
+        new Map(dataToRender.data.map((g) => [g.id, g])).values()
+      );
+      setGifsMostrados(uniqueGifs);
     }
   }, [dataToRender]);
 
-  useEffect(() => {
-    console.log("Gifs cliqueados (actualizados):", gifsCliqueados);
-  }, [gifsCliqueados]);
+  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+
+  const manejarClick = () => setMostrarBoton(false);
+
+  const handleSubirContador = () => setContador((prev) => prev + 1);
+
+  const resetearContador = () => setContador(0);
+
+  const handleBestScore = (contadorActual) => {
+    if (contadorActual > bestScore) setBestScore(contadorActual);
+  };
+
+  const handleGifSeleccionado = (gif) => {
+    const yaEsta = gifsCliqueados.some((g) => g.id === gif.id);
+
+    if (!yaEsta) {
+      // agregar a gifsCliqueados y subir contador
+      setGifsCliqueados((prev) => [...prev, gif]);
+      handleSubirContador();
+
+      // mezclar los GIFs para mostrar
+      setGifsMostrados(shuffleArray(gifsMostrados));
+    } else {
+      // GIF ya clickeado → terminar juego
+      setMostrarModal(true);
+      handleBestScore(contador);
+      resetearContador();
+      setGifsCliqueados([]);
+      setGifsMostrados(shuffleArray(gifsMostrados));
+    }
+  };
 
   return (
     <div className="text-yellow-300">
@@ -79,12 +63,12 @@ function DataRender({ dataToRender, getData, limit, setearLimite }) {
             <input
               className="w-[300px] bg-white border border-gray-300 rounded px-3 py-1 mt-1 placeholder-gray-500 text-center text-gray-800"
               placeholder="Ingresar la cantidad de gifs"
-              onChange={(e) => setearLimite(e)}
+              onChange={setearLimite}
             />
           </label>
           <button
             onClick={() => {
-              manejarClick(false);
+              manejarClick();
               getData(limit);
             }}
           >
@@ -92,16 +76,15 @@ function DataRender({ dataToRender, getData, limit, setearLimite }) {
           </button>
         </div>
       )}
-      {mostrarModal ? (
-        <Modal cerrar="Cerrar" onClose={() => setMostrarModal(false)} />
-      ) : (
+
+      {mostrarModal && <Modal cerrar="Cerrar" onClose={() => setMostrarModal(false)} />}
+
+      {!mostrarModal && !mostrarBoton && (
         <div>
-          <div>
-            {mostrarBoton === false && (<ScoreRender currentScore={contador} bestScore={bestScore} />)}
-          </div>
+          <ScoreRender currentScore={contador} bestScore={bestScore} />
           <div className="grid grid-cols-4 gap-4 mt-4">
             {gifsMostrados.map((gif) =>
-              gif !== undefined ? (
+              gif ? (
                 <Card
                   key={gif.id}
                   gif={gif}

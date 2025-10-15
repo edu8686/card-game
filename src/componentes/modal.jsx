@@ -1,34 +1,17 @@
 function Modal({ onClose, cerrar }) {
   return (
-    <div>
-      <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
-        <div className="max-h-full w-full max-w-xl overflow-y-auto sm:rounded-2xl bg-white">
-          <div className="w-full">
-            <div className="m-8 my-20 max-w-[400px] mx-auto">
-              <div className="mb-8">
-                <h1 className="mb-4 text-3xl font-extrabold">
-                  Turn on notifications
-                </h1>
-                <p className="text-gray-600">
-                  Get the most out of Twitter by staying up to date with
-                  what's happening.
-                </p>
-              </div>
-              <div className="space-y-4 ">
-                <button
-                  onClick={onClose}
-                  className="p-3 bg-black rounded-full text-white w-full font-semibold"
-                >
-                  {cerrar}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center">
+        <h1 className="text-3xl font-extrabold mb-6">Game over</h1>
+        <button
+          onClick={onClose}
+          className="bg-black text-white font-semibold px-6 py-3 rounded-full"
+        >
+          {cerrar}
+        </button>
       </div>
     </div>
   );
 }
 
 export default Modal;
-
